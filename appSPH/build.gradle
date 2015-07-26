@@ -1,0 +1,32 @@
+apply plugin: 'com.android.model.application'
+
+model {
+    android {
+        compileSdkVersion = rootProject.ext.compileSdkVersion
+        buildToolsVersion = rootProject.ext.buildToolsVersion
+
+        defaultConfig.with {
+            applicationId = "io.harism.app.sph"
+            minSdkVersion.apiLevel = 21
+            targetSdkVersion.apiLevel = 22
+            versionCode = 1
+            versionName = "1.0"
+        }
+    }
+    android.ndk {
+        moduleName = 'SPH'
+        cppFlags += ['-Werror', '-fno-rtti', '-fno-exceptions', '-std=c++11']
+        CFlags += ['-Werror']
+        ldLibs += ['log', 'GLESv3']
+    }
+    android.buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles += file('proguard-rules.pro')
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
