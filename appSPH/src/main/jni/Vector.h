@@ -3,42 +3,48 @@
 
 #include <GLES3/gl3.h>
 
+template<class T>
+
 class Vector3 {
 
 public:
-    Vector3();
+    Vector3<T>();
 
-    Vector3(GLfloat x, GLfloat y, GLfloat z);
+    Vector3<T>(T x, T y, T z);
 
-    Vector3(const Vector3 &vec);
+    Vector3<T>(const Vector3<T> &vec);
 
-    virtual ~Vector3();
+    virtual ~Vector3<T>();
 
-    Vector3 operator+(const Vector3 &vec);
+    Vector3<T> operator+() const;
 
-    void operator+=(const Vector3 &vec);
+    Vector3<T> operator+(const Vector3<T> &vec) const;
 
-    Vector3 operator-(const Vector3 &vec);
+    void operator+=(const Vector3<T> &vec);
 
-    void operator-=(const Vector3 &vec);
+    Vector3<T> operator-() const;
 
-    Vector3 operator*(const Vector3 &vec);
+    Vector3<T> operator-(const Vector3<T> &vec) const;
 
-    void operator*=(const Vector3 &vec);
+    void operator-=(const Vector3<T> &vec);
 
-    Vector3 operator/(const Vector3 &vec);
+    Vector3<T> operator*(const Vector3<T> &vec) const;
 
-    void operator/=(const Vector3 &vec);
+    void operator*=(const Vector3<T> &vec);
 
-    GLfloat length();
+    Vector3<T> operator/(const Vector3<T> &vec) const;
 
-    Vector3 normalize();
+    void operator/=(const Vector3<T> &vec);
 
-    GLfloat dot(const Vector3 &vec);
+    T length() const;
 
-    Vector3 cross(const Vector3 &vec);
+    Vector3<T> normalize();
 
-    GLfloat v[3];
+    T dot(const Vector3<T> &vec) const;
+
+    Vector3<T> cross(const Vector3<T> &vec) const;
+
+    T v[3];
 };
 
 #endif

@@ -29,7 +29,7 @@ GLProgram::GLProgram(const GLchar *vsSource, const GLchar *fsSource) {
     glDeleteShader(fsComp);
 }
 
-virtual GLProgram::~GLProgram() {
+GLProgram::~GLProgram() {
     glDeleteProgram(id);
     id = 0;
 }
