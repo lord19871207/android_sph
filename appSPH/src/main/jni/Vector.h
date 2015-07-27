@@ -41,6 +41,9 @@ public:
     T v[3];
 };
 
+typedef Vector3 <double> Vector3d;
+typedef Vector3 <GLfloat> Vector3f;
+
 template<class T>
 Vector3<T>::Vector3() {
     v[0] = v[1] = v[2] = 0;

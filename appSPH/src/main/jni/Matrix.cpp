@@ -14,57 +14,64 @@ void Matrix4x4::setIdentity() {
     }
 }
 
-void Matrix4x4::setPerspective(double fov, double aspect, double near, double far) {
-    const double D2R = M_PI / 180.0;
-    const double yScale = 1.0 / tan(D2R * fov / 2);
-    const double xScale = yScale / aspect;
-    const double nearmfar = near - far;
+void Matrix4x4::setFrustum(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top,
+                           GLfloat znear, GLfloat zfar) {
+    GLfloat temp = 2.0f * znear;
+    GLfloat temp2 = right - left;
+    GLfloat temp3 = top - bottom;
+    GLfloat temp4 = zfar - znear;
 
-    m[0] = (GLfloat) xScale;
+    m[0] = temp / temp2;
     m[1] = 0;
     m[2] = 0;
     m[3] = 0;
 
     m[4] = 0;
-    m[5] = (GLfloat) yScale;
+    m[5] = temp / temp3;
     m[6] = 0;
     m[7] = 0;
 
-    m[8] = 0;
-    m[9] = 0;
-    m[10] = (GLfloat) ((far + near) / nearmfar);
+    m[8] = (right + left) / temp2;
+    m[9] = (top + bottom) / temp3;
+    m[10] = (-zfar - znear) / temp4;
     m[11] = -1;
 
     m[12] = 0;
     m[13] = 0;
-    m[14] = (GLfloat) (2 * far * near / nearmfar);
+    m[14] = (-temp * zfar) / temp4;
     m[15] = 0;
 }
 
-void Matrix4x4::setLookAt(const Vector3<GLfloat> &eyePos, const Vector3<GLfloat> &lookAt,
-                          const Vector3<GLfloat> &upVector) {
-    const Vector3<GLfloat> zaxis = (lookAt - eyePos).normalize();
-    const Vector3<GLfloat> xaxis = upVector.cross(zaxis).normalize();
-    const Vector3<GLfloat> yaxis = zaxis.cross(xaxis);
-    const Vector3<GLfloat> negEye = -eyePos;
 
-    m[0] = xaxis.v[0];
-    m[1] = xaxis.v[1];
-    m[2] = xaxis.v[2];
-    m[3] = xaxis.dot(negEye);
+void Matrix4x4::setPerspective(GLfloat fov, GLfloat aspect, GLfloat znear, GLfloat zfar) {
+    GLfloat ymax = (GLfloat) (znear * tan(fov * M_PI / 360.0));
+    GLfloat xmax = ymax * aspect;
+    setFrustum(-xmax, xmax, -ymax, ymax, znear, zfar);
+}
 
-    m[4] = yaxis.v[0];
-    m[5] = yaxis.v[1];
-    m[6] = yaxis.v[2];
-    m[7] = yaxis.dot(negEye);
+void Matrix4x4::setLookAt(const Vector3f &eyePos, const Vector3f &center,
+                          const Vector3f &upVector) {
+    const Vector3f forward = (center - eyePos).normalize();
+    const Vector3f side = forward.cross(upVector).normalize();
+    const Vector3f up = side.cross(forward);
 
-    m[8] = zaxis.v[0];
-    m[9] = zaxis.v[1];
-    m[10] = zaxis.v[2];
-    m[11] = zaxis.dot(negEye);
+    m[0] = side.v[0];
+    m[1] = up.v[0];
+    m[2] = -forward.v[0];
+    m[3] = 0;
 
-    m[12] = 0;
-    m[13] = 0;
-    m[14] = 0;
+    m[4] = side.v[1];
+    m[5] = up.v[1];
+    m[6] = -forward.v[1];
+    m[7] = 0;
+
+    m[8] = side.v[2];
+    m[9] = up.v[2];
+    m[10] = -forward.v[2];
+    m[11] = 0;
+
+    m[12] = -eyePos.v[0];
+    m[13] = -eyePos.v[1];
+    m[14] = -eyePos.v[2];
     m[15] = 1;
 }

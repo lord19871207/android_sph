@@ -1,54 +1,55 @@
 #include "GLProgram.h"
+#include "GLUtils.h"
 #include <android/log.h>
 
 GLProgram::GLProgram(const GLchar *vsSource, const GLchar *fsSource) {
-    id = glCreateProgram();
+    GL_CHECK( id = glCreateProgram() );
     if (!id) {
         return;
     }
 
-    GLuint vsComp = compileShader(vsSource, GL_VERTEX_SHADER);
-    GLuint fsComp = compileShader(fsSource, GL_FRAGMENT_SHADER);
+    GL_CHECK( GLuint vsComp = compileShader(vsSource, GL_VERTEX_SHADER) );
+    GL_CHECK( GLuint fsComp = compileShader(fsSource, GL_FRAGMENT_SHADER) );
 
     if (vsComp && fsComp) {
         GLint linkStatus = GL_FALSE;
-        glAttachShader(id, vsComp);
-        glAttachShader(id, fsComp);
-        glLinkProgram(id);
-        glGetProgramiv(id, GL_LINK_STATUS, &linkStatus);
+        GL_CHECK( glAttachShader(id, vsComp) );
+        GL_CHECK( glAttachShader(id, fsComp) );
+        GL_CHECK( glLinkProgram(id) );
+        GL_CHECK( glGetProgramiv(id, GL_LINK_STATUS, &linkStatus) );
         if (linkStatus != GL_TRUE) {
             GLchar infoLog[2048];
-            glGetProgramInfoLog(id, 2048, nullptr, infoLog);
+            GL_CHECK( glGetProgramInfoLog(id, 2048, nullptr, infoLog) );
             __android_log_print(ANDROID_LOG_ERROR, "GLProgram", "%s", infoLog);
-            glDeleteProgram(id);
+            GL_CHECK( glDeleteProgram(id) );
             id = 0;
         }
     }
 
-    glDeleteShader(vsComp);
-    glDeleteShader(fsComp);
+    GL_CHECK( glDeleteShader(vsComp) );
+    GL_CHECK( glDeleteShader(fsComp) );
 }
 
 GLProgram::~GLProgram() {
-    glDeleteProgram(id);
+    GL_CHECK( glDeleteProgram(id) );
     id = 0;
 }
 
 GLuint GLProgram::compileShader(const GLchar *source, GLenum type) {
-    GLuint shader = glCreateShader(type);
+    GL_CHECK( GLuint shader = glCreateShader(type) );
     if (!shader) {
         return 0;
     }
 
     GLint compileStatus = GL_FALSE;
-    glShaderSource(shader, 1, &source, nullptr);
-    glCompileShader(shader);
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+    GL_CHECK( glShaderSource(shader, 1, &source, nullptr) );
+    GL_CHECK( glCompileShader(shader) );
+    GL_CHECK( glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus) );
     if (compileStatus != GL_TRUE) {
         GLchar infoLog[2048];
-        glGetShaderInfoLog(shader, 2048, nullptr, infoLog);
+        GL_CHECK( glGetShaderInfoLog(shader, 2048, nullptr, infoLog) );
         __android_log_print(ANDROID_LOG_ERROR, "GLProgram", "%s", infoLog);
-        glDeleteShader(shader);
+        GL_CHECK( glDeleteShader(shader) );
         shader = 0;
     }
 

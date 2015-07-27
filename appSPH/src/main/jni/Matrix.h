@@ -13,10 +13,12 @@ public:
 
     void setIdentity();
 
-    void setPerspective(double fov, double aspect, double near, double far);
+    void setFrustum(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top,
+                    GLfloat znear, GLfloat zfar);
 
-    void setLookAt(const Vector3<GLfloat> &eyePos, const Vector3<GLfloat> &lookAt,
-                   const Vector3<GLfloat> &upVector);
+    void setPerspective(GLfloat fov, GLfloat aspect, GLfloat znear, GLfloat zfar);
+
+    void setLookAt(const Vector3f &eyePos, const Vector3f &lookAt, const Vector3f &upVector);
 
     GLfloat m[16];
 
