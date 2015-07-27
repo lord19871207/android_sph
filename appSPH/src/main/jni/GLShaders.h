@@ -8,18 +8,22 @@
 const GLchar *CUBE_VS = "#version 300 es\n"
         GL_STRINGIFY(
                 layout(location = 0) in vec4 position;
+                layout(location = 1) in vec4 color;
                 uniform mat4 viewMatrix;
                 uniform mat4 projMatrix;
+                out vec4 outColor;
                 void main() {
-                    gl_Position = projMatrix * viewMatrix * vec4(position.xyz, 1.0);
+                        outColor = color;
+                        gl_Position = projMatrix * viewMatrix * position;
                 }
         );
 
 const GLchar *CUBE_FS = "#version 300 es\n"
         GL_STRINGIFY(
+                in vec4 outColor;
                 out vec4 fragColor;
                 void main() {
-                    fragColor = vec4(1.0);
+                        fragColor = outColor;
                 }
         );
 
