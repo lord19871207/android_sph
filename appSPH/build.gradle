@@ -18,6 +18,7 @@ model {
         cppFlags += ['-Werror', '-fno-rtti', '-fno-exceptions', '-std=c++11']
         CFlags += ['-Werror']
         ldLibs += ['log', 'GLESv3']
+        stl = 'stlport_static'
     }
     android.buildTypes {
         release {

@@ -5,6 +5,7 @@
 
 GLRenderer::GLRenderer() {
     GL_CHECK(glProgramCube = new GLProgram(CUBE_VS, CUBE_FS));
+    GL_CHECK(glProgramParticle = new GLProgram(PARTICLE_VS, PARTICLE_FS));
     GL_CHECK(glEnable(GL_CULL_FACE));
     GL_CHECK(glEnable(GL_DEPTH_TEST));
 }
@@ -24,14 +25,19 @@ void GLRenderer::surfaceChanged(GLint width, GLint height) {
     viewMatrix.setLookAt(Vector3f(0, 0, 1), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
 }
 
-void GLRenderer::renderFrame() {
+void GLRenderer::renderFrame(const SPHSimulation *simulation) {
+    renderBackground();
+    renderParticles(simulation);
+}
+
+void GLRenderer::renderBackground() {
     GL_CHECK(glClearColor(0, 0, 0, 1.0));
     GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    GL_CHECK(glUseProgram(glProgramCube->id));
     GL_CHECK(GLint projM = glGetUniformLocation(glProgramCube->id, "projMatrix"));
     GL_CHECK(GLint viewM = glGetUniformLocation(glProgramCube->id, "viewMatrix"));
 
+    GL_CHECK(glUseProgram(glProgramCube->id));
     GL_CHECK(glUniformMatrix4fv(projM, 1, GL_FALSE, projectionMatrix.m));
     GL_CHECK(glUniformMatrix4fv(viewM, 1, GL_FALSE, viewMatrix.m));
 
@@ -72,4 +78,34 @@ void GLRenderer::renderFrame() {
 
     GL_CHECK(glDisableVertexAttribArray(0));
     GL_CHECK(glDisableVertexAttribArray(1));
+}
+
+void GLRenderer::renderParticles(const SPHSimulation *simulation) {
+    GL_CHECK(GLint projM = glGetUniformLocation(glProgramParticle->id, "projMatrix"));
+    GL_CHECK(GLint viewM = glGetUniformLocation(glProgramParticle->id, "viewMatrix"));
+    GL_CHECK(GLint particlePos = glGetUniformLocation(glProgramParticle->id, "particlePosition"));
+    GL_CHECK(GLint particleScale = glGetUniformLocation(glProgramParticle->id, "particleScale"));
+
+    GL_CHECK(glUseProgram(glProgramParticle->id));
+    GL_CHECK(glUniformMatrix4fv(projM, 1, GL_FALSE, projectionMatrix.m));
+    GL_CHECK(glUniformMatrix4fv(viewM, 1, GL_FALSE, viewMatrix.m));
+    GL_CHECK(glUniform1f(particleScale, 0.1));
+
+    GLfloat VERTICES[] = {-1, 1, -1, -1, 1, 1, 1, -1};
+
+    GL_CHECK(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, VERTICES));
+    GL_CHECK(glEnableVertexAttribArray(0));
+
+    std::vector<SPHParticle *>::const_iterator iter = simulation->particles.begin();
+    while (iter != simulation->particles.end()) {
+        GL_CHECK(glUniform4f(particlePos,
+                             (GLfloat) (*iter)->position.v[0],
+                             (GLfloat) (*iter)->position.v[1],
+                             (GLfloat) (*iter)->position.v[2],
+                             0));
+        GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+        ++iter;
+    }
+
+    GL_CHECK(glDisableVertexAttribArray(0));
 }
