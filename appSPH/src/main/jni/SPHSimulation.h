@@ -15,6 +15,16 @@ public:
     void initialize(double left, double right, double top, double bottom,
                     double znear, double zfar);
 
+    void simulate();
+
+private:
+    void calcPressure();
+
+    void calcForce();
+
+    void calcAdvance();
+
+public:
     std::vector<SPHParticle *> particles;
     SPHPlane **planes;
 

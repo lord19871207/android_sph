@@ -30,6 +30,10 @@ public:
 
     void operator-=(const Vector3<T> &vec);
 
+    Vector3<T> operator*(T value) const;
+
+    void operator*=(T value);
+
     T length() const;
 
     Vector3<T> normalize() const;
@@ -41,8 +45,8 @@ public:
     T v[3];
 };
 
-typedef Vector3 <double> Vector3d;
-typedef Vector3 <GLfloat> Vector3f;
+typedef Vector3<double> Vector3d;
+typedef Vector3<GLfloat> Vector3f;
 
 template<class T>
 Vector3<T>::Vector3() {
@@ -107,6 +111,18 @@ void Vector3<T>::operator-=(const Vector3<T> &vec) {
     v[0] -= vec.v[0];
     v[1] -= vec.v[1];
     v[2] -= vec.v[2];
+}
+
+template<class T>
+Vector3<T> Vector3<T>::operator*(T value) const {
+    return Vector3<T>(v[0] * value, v[1] * value, v[2] * value);
+}
+
+template<class T>
+void Vector3<T>::operator*=(T value) {
+    v[0] *= value;
+    v[1] *= value;
+    v[2] *= value;
 }
 
 template<class T>

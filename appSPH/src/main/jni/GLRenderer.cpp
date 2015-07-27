@@ -89,7 +89,7 @@ void GLRenderer::renderParticles(const SPHSimulation *simulation) {
     GL_CHECK(glUseProgram(glProgramParticle->id));
     GL_CHECK(glUniformMatrix4fv(projM, 1, GL_FALSE, projectionMatrix.m));
     GL_CHECK(glUniformMatrix4fv(viewM, 1, GL_FALSE, viewMatrix.m));
-    GL_CHECK(glUniform1f(particleScale, 0.1));
+    GL_CHECK(glUniform1f(particleScale, 0.05));
 
     GLfloat VERTICES[] = {-1, 1, -1, -1, 1, 1, 1, -1};
 
@@ -98,13 +98,13 @@ void GLRenderer::renderParticles(const SPHSimulation *simulation) {
 
     std::vector<SPHParticle *>::const_iterator iter = simulation->particles.begin();
     while (iter != simulation->particles.end()) {
+        SPHParticle *particle = *iter++;
         GL_CHECK(glUniform4f(particlePos,
-                             (GLfloat) (*iter)->position.v[0],
-                             (GLfloat) (*iter)->position.v[1],
-                             (GLfloat) (*iter)->position.v[2],
+                             (GLfloat) particle->position.v[0],
+                             (GLfloat) particle->position.v[1],
+                             (GLfloat) particle->position.v[2],
                              0));
         GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-        ++iter;
     }
 
     GL_CHECK(glDisableVertexAttribArray(0));
