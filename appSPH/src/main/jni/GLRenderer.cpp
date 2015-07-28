@@ -90,7 +90,7 @@ void GLRenderer::renderParticles(const SPHSimulation *simulation) {
     GL_CHECK(glUseProgram(glProgramParticle->id));
     GL_CHECK(glUniformMatrix4fv(projM, 1, GL_FALSE, projectionMatrix.m));
     GL_CHECK(glUniformMatrix4fv(viewM, 1, GL_FALSE, viewMatrix.m));
-    GL_CHECK(glUniform1f(particleScale, 0.04));
+    GL_CHECK(glUniform1f(particleScale, 0.025));
 
     GLfloat VERTICES[] = {-1, 1, -1, -1, 1, 1, 1, -1};
 

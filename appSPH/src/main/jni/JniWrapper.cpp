@@ -8,7 +8,7 @@ GLRenderer *glRenderer = nullptr;
 
 JNIEXPORT void JNICALL Java_io_harism_app_sph_JniWrapper_onSurfaceCreated(
         JNIEnv *env, jobject obj) {
-    sphSimulation = new SPHSimulation(250);
+    sphSimulation = new SPHSimulation(1000);
     glRenderer = new GLRenderer();
 }
 

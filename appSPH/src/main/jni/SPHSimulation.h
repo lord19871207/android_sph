@@ -5,6 +5,8 @@
 #include "SPHParticle.h"
 #include "SPHPlane.h"
 
+#define GRID_SIZE 32
+
 class SPHSimulation {
 
 public:
@@ -17,6 +19,8 @@ public:
     void simulate();
 
 private:
+    void calcGrids();
+
     void calcPressure();
 
     void calcForce();
@@ -27,10 +31,12 @@ private:
 
     Vector2d applyForce(const SPHParticle *Pi);
 
+    int getGridIndex(const SPHParticle* P);
+
 public:
     std::vector<SPHParticle *> particles;
+    std::vector<const SPHParticle *> grid[GRID_SIZE * GRID_SIZE];
     SPHPlane **planes;
-
 };
 
 #endif

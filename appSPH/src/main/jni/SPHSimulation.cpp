@@ -1,7 +1,7 @@
 #include "SPHSimulation.h"
 
 struct FluidVars {
-    double timeDiff = 0.003;
+    double timeDiff = 1.0 / 360.0;
     double restDensity = 600.0;
     double internalStiffness = 1.5;
     double viscosity = 0.35;
@@ -16,8 +16,8 @@ struct FluidVars {
     Vector2d gravity = {0.0, -9.8};
 
     double particleMass = 0.00020543;
-    double smoothingRadius = 0.08;
-    double boundaryRadius = 0.08;
+    double smoothingRadius = 0.04;
+    double boundaryRadius = 0.04;
 
     double d2 = simulationScale * simulationScale;
     double rd2 = smoothingRadius * smoothingRadius / d2;
@@ -71,9 +71,55 @@ void SPHSimulation::initialize(double left, double right, double top, double bot
 }
 
 void SPHSimulation::simulate() {
+    calcGrids();
     calcPressure();
     calcForce();
     calcAdvance();
+}
+
+void SPHSimulation::calcGrids() {
+    for (int i = 0; i < GRID_SIZE * GRID_SIZE; ++i) {
+        grid[i].clear();
+    }
+
+    double sw = planes[0]->offset + planes[1]->offset;
+    double sh = planes[2]->offset + planes[3]->offset;
+
+    std::vector<SPHParticle*>::const_iterator iter = particles.begin();
+    while (iter != particles.end()) {
+        const SPHParticle* P = *iter++;
+
+        double tx = (P->position.v[0] + planes[0]->offset) / sw;
+        double ty = (P->position.v[1] + planes[3]->offset) / sh;
+
+        int gx = (int)round(tx * GRID_SIZE);
+        int gy = (int)round(ty * GRID_SIZE);
+
+        if (gx < 0) {
+            gx = 0;
+        }
+        if (gx >= GRID_SIZE) {
+            gx = GRID_SIZE - 1;
+        }
+        if (gy < 0) {
+            gy = 0;
+        }
+        if (gy >= GRID_SIZE) {
+            gy = GRID_SIZE - 1;
+        }
+
+        for (int ii = 0; ii < 9; ++ii) {
+            int dx = ii % 3 - 1;
+            int dy = ii / 3 - 1;
+
+            int ggx = gx + dx;
+            int ggy = gy + dy;
+
+            if (ggx >= 0 && ggx < GRID_SIZE && ggy >= 0 && ggy < GRID_SIZE) {
+                grid[ggy * GRID_SIZE + ggx].push_back(P);
+            }
+        }
+    }
 }
 
 void SPHSimulation::calcPressure() {
@@ -153,10 +199,11 @@ void SPHSimulation::calcAdvance() {
 }
 
 double SPHSimulation::applyPressure(const SPHParticle *Pi) {
+    int gridIndex = getGridIndex(Pi);
     double sum = 0;
     Vector2d ri = Pi->position;
-    std::vector<SPHParticle *>::const_iterator iter = particles.begin();
-    while (iter != particles.end()) {
+    std::vector<const SPHParticle *>::const_iterator iter = grid[gridIndex].begin();
+    while (iter != grid[gridIndex].end()) {
         const SPHParticle *Pj = *iter++;
         Vector2d rj = Pj->position;
         Vector2d rij = ri - rj;
@@ -173,6 +220,8 @@ double SPHSimulation::applyPressure(const SPHParticle *Pi) {
 }
 
 Vector2d SPHSimulation::applyForce(const SPHParticle *Pi) {
+    int gridIndex = getGridIndex(Pi);
+
     Vector2d fp;
     Vector2d fv;
 
@@ -181,8 +230,8 @@ Vector2d SPHSimulation::applyForce(const SPHParticle *Pi) {
     double pi = Pi->pressure;
     double di = Pi->density;
 
-    std::vector<SPHParticle *>::const_iterator iter = particles.begin();
-    while (iter != particles.end()) {
+    std::vector<const SPHParticle *>::const_iterator iter = grid[gridIndex].begin();
+    while (iter != grid[gridIndex].end()) {
         const SPHParticle *Pj = *iter++;
 
         Vector2d rj = Pj->position;
@@ -202,4 +251,26 @@ Vector2d SPHSimulation::applyForce(const SPHParticle *Pi) {
 
     return (fp * 0.5 * fluidVars.spikyKern * fluidVars.simulationScale +
             fv * fluidVars.viscosity * fluidVars.lapKern) * di;
+}
+
+int SPHSimulation::getGridIndex(const SPHParticle *P) {
+    double sw = planes[1]->offset + planes[0]->offset;
+    double sh = planes[2]->offset + planes[3]->offset;
+    double tx = (P->position.v[0] + planes[0]->offset) / sw;
+    double ty = (P->position.v[1] + planes[3]->offset) / sh;
+    int gx = (int)round(tx * GRID_SIZE);
+    int gy = (int)round(ty * GRID_SIZE);
+    if (gx < 0) {
+        gx = 0;
+    }
+    if (gx >= GRID_SIZE) {
+        gx = GRID_SIZE - 1;
+    }
+    if (gy < 0) {
+        gy = 0;
+    }
+    if (gy >= GRID_SIZE) {
+        gy = GRID_SIZE - 1;
+    }
+    return gy * GRID_SIZE + gx;
 }
