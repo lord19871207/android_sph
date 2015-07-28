@@ -1,7 +1,7 @@
 #include "SPHSimulation.h"
 
 struct FluidVars {
-    double timeDiff = 1.0 / 180.0;
+    double timeDiff = 0.003;
     double restDensity = 600.0;
     double internalStiffness = 1.5;
     double viscosity = 0.35;
@@ -13,11 +13,11 @@ struct FluidVars {
     double velocityLimit = 600.0;
     double simulationScale = 1.0;
 
-    Vector3d gravity = {0.0, -9.8, 0.0};
+    Vector2d gravity = {0.0, -9.8};
 
-    double particleMass = 0.00020543 * 10;
-    double smoothingRadius = 0.05;
-    double boundaryRadius = 0.1;
+    double particleMass = 0.00020543;
+    double smoothingRadius = 0.08;
+    double boundaryRadius = 0.08;
 
     double d2 = simulationScale * simulationScale;
     double rd2 = smoothingRadius * smoothingRadius / d2;
@@ -32,13 +32,11 @@ SPHSimulation::SPHSimulation(size_t particleCount) {
         particles.push_back(new SPHParticle());
     }
 
-    planes = new SPHPlane *[6];
-    planes[0] = new SPHPlane(Vector3d(1, 0, 0), 1);
-    planes[1] = new SPHPlane(Vector3d(-1, 0, 0), 1);
-    planes[2] = new SPHPlane(Vector3d(0, -1, 0), 1);
-    planes[3] = new SPHPlane(Vector3d(0, 1, 0), 1);
-    planes[4] = new SPHPlane(Vector3d(0, 0, -1), 1);
-    planes[5] = new SPHPlane(Vector3d(0, 0, 1), 0);
+    planes = new SPHPlane *[4];
+    planes[0] = new SPHPlane(Vector2d(1, 0), 1);
+    planes[1] = new SPHPlane(Vector2d(-1, 0), 1);
+    planes[2] = new SPHPlane(Vector2d(0, -1), 1);
+    planes[3] = new SPHPlane(Vector2d(0, 1), 1);
 }
 
 SPHSimulation::~SPHSimulation() {
@@ -48,7 +46,7 @@ SPHSimulation::~SPHSimulation() {
     }
 
     if (planes) {
-        for (int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 4; ++i) {
             delete planes[i];
         }
         delete planes;
@@ -56,24 +54,19 @@ SPHSimulation::~SPHSimulation() {
     }
 }
 
-void SPHSimulation::initialize(double left, double right, double top, double bottom,
-                               double znear, double zfar) {
+void SPHSimulation::initialize(double left, double right, double top, double bottom) {
     planes[0]->offset = abs(left);
     planes[1]->offset = abs(right);
     planes[2]->offset = abs(top);
     planes[3]->offset = abs(bottom);
-    planes[4]->offset = abs(znear);
-    planes[5]->offset = abs(zfar);
 
     std::vector<SPHParticle *>::const_iterator iter = particles.begin();
     while (iter != particles.end()) {
         double x = left + (right - left) * rand() / (double) RAND_MAX;
         double y = bottom + (top - bottom) * rand() / (double) RAND_MAX;
-        double z = znear + (zfar - znear) * rand() / (double) RAND_MAX;
         SPHParticle *particle = *iter++;
         particle->position.v[0] = x;
         particle->position.v[1] = y;
-        particle->position.v[2] = z;
     }
 }
 
@@ -104,15 +97,17 @@ void SPHSimulation::calcForce() {
 void SPHSimulation::calcAdvance() {
     std::vector<SPHParticle *>::iterator iter = particles.begin();
     while (iter != particles.end()) {
-        Vector3d position = (*iter)->position;
-        Vector3d velocity = (*iter)->velocity;
-        Vector3d velocityEval = (*iter)->velocityEval;
-        Vector3d acceleration = (*iter)->force;
+        SPHParticle *P = *iter++;
+
+        Vector2d position = P->position;
+        Vector2d velocity = P->velocity;
+        Vector2d velocityEval = P->velocityEval;
+        Vector2d acceleration = P->force;
 
         acceleration *= fluidVars.particleMass;
 
-        for (int i = 0; i < 6; ++i) {
-            Vector3d normal(planes[i]->normal);
+        for (int i = 0; i < 4; ++i) {
+            Vector2d normal(planes[i]->normal);
             double offset = planes[i]->offset;
             double dist = position.dot(normal) + offset - fluidVars.boundaryRadius;
             if (dist < 0) {
@@ -148,12 +143,10 @@ void SPHSimulation::calcAdvance() {
         //(*iter)->position = position;
         //(*iter)->velocity = velocity;
 
-        Vector3d vnext = acceleration * fluidVars.timeDiff + velocity;
-        (*iter)->velocityEval = (velocity + vnext) * 0.5f;
-        (*iter)->velocity = vnext;
-        (*iter)->position = position + vnext * (fluidVars.timeDiff / fluidVars.simulationScale);
-
-        ++iter;
+        Vector2d vnext = acceleration * fluidVars.timeDiff + velocity;
+        P->velocityEval = (velocity + vnext) * 0.5f;
+        P->velocity = vnext;
+        P->position = position + vnext * (fluidVars.timeDiff / fluidVars.simulationScale);
     }
 
 
@@ -161,29 +154,30 @@ void SPHSimulation::calcAdvance() {
 
 double SPHSimulation::applyPressure(const SPHParticle *Pi) {
     double sum = 0;
-    Vector3d ri = Pi->position;
+    Vector2d ri = Pi->position;
     std::vector<SPHParticle *>::const_iterator iter = particles.begin();
     while (iter != particles.end()) {
         const SPHParticle *Pj = *iter++;
-        Vector3d rj = Pj->position;
-        Vector3d rij = ri - rj;
+        Vector2d rj = Pj->position;
+        Vector2d rij = ri - rj;
         double r2 = rij.dot(rij);
         if (r2 > 0.0 && r2 < fluidVars.rd2) {
             sum += pow((fluidVars.rd2 - r2) * fluidVars.d2, 3.0);
         }
     }
     sum = fluidVars.particleMass * fluidVars.poly6Kern * sum;
-    if (sum == 0.0) {
+    if (sum < 1.0) {
         sum = 1.0;
     }
     return sum;
 }
 
-Vector3d SPHSimulation::applyForce(const SPHParticle *Pi) {
-    Vector3d force;
+Vector2d SPHSimulation::applyForce(const SPHParticle *Pi) {
+    Vector2d fp;
+    Vector2d fv;
 
-    Vector3d ri = Pi->position;
-    Vector3d vi = Pi->velocityEval;
+    Vector2d ri = Pi->position;
+    Vector2d vi = Pi->velocityEval;
     double pi = Pi->pressure;
     double di = Pi->density;
 
@@ -191,21 +185,21 @@ Vector3d SPHSimulation::applyForce(const SPHParticle *Pi) {
     while (iter != particles.end()) {
         const SPHParticle *Pj = *iter++;
 
-        Vector3d rj = Pj->position;
-        Vector3d rij = ri - rj;
+        Vector2d rj = Pj->position;
+        Vector2d rij = ri - rj;
         double r2 = rij.dot(rij);
         if (r2 > 0.0 && r2 < fluidVars.rd2) {
             double r = sqrt(r2 * fluidVars.d2);
             double c = fluidVars.smoothingRadius - r;
-            Vector3d vj = Pj->velocityEval;
+            Vector2d vj = Pj->velocityEval;
             double pj = Pj->pressure;
             double dj = Pj->density;
 
-            double pterm =
-                    fluidVars.simulationScale * -0.5 * c * fluidVars.lapKern * (pi + pj) / r;
-            force += (rij * pterm + (vj - vi) * fluidVars.viscosity) * c * di * dj;
+            fp += rij * (c * c * (pi + pj) * dj / r);
+            fv += (vj - vi) * c * dj;
         }
     }
 
-    return force;
+    return (fp * 0.5 * fluidVars.spikyKern * fluidVars.simulationScale +
+            fv * fluidVars.viscosity * fluidVars.lapKern) * di;
 }

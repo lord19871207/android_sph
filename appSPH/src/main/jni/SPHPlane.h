@@ -1,17 +1,17 @@
 #ifndef SPH_SPHPLANE_H
 #define SPH_SPHPLANE_H
 
-#include "Vector.h"
+#include "Vector2.h"
 
 class SPHPlane {
 
 public:
-    SPHPlane(Vector3d normal, double offset) {
+    SPHPlane(Vector2d normal, double offset) {
         this->normal = normal;
         this->offset = offset;
     }
 
-    Vector3d normal;
+    Vector2d normal;
     double offset;
 
 };

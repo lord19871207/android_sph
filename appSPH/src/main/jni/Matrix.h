@@ -1,7 +1,7 @@
 #ifndef SPH_MATRIX_H
 #define SPH_MATRIX_H
 
-#include "Vector.h"
+#include "Vector3.h"
 #include <GLES3/gl3.h>
 
 class Matrix4x4 {

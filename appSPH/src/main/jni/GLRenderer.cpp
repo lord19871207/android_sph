@@ -22,7 +22,7 @@ void GLRenderer::surfaceChanged(GLint width, GLint height) {
     this->height = height;
     GLfloat aspect = (GLfloat) height / width;
     projectionMatrix.setFrustum(-1, 1, -aspect, aspect, 1, 10);
-    viewMatrix.setLookAt(Vector3f(0, 0, 1.5), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+    viewMatrix.setLookAt(Vector3f(0, 0, 1), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
 }
 
 void GLRenderer::renderFrame(const SPHSimulation *simulation) {
@@ -42,18 +42,19 @@ void GLRenderer::renderBackground() {
     GL_CHECK(glUniformMatrix4fv(viewM, 1, GL_FALSE, viewMatrix.m));
 
     GLfloat aspect = (GLfloat) height / width;
+    GLfloat zf = -.1f;
 
     GLfloat VERTICES[] = {
-            -1, -aspect, 0, -1, -aspect, -1, -1, aspect, 0,  // left
-            -1, -aspect, -1, -1, aspect, -1, -1, aspect, 0,  // left
-            1, aspect, 0, 1, aspect, -1, 1, -aspect, 0,      // right
-            1, aspect, -1, 1, -aspect, -1, 1, -aspect, 0,    // right
-            -1, aspect, 0, -1, aspect, -1, 1, aspect, 0,     // top
-            -1, aspect, -1, 1, aspect, -1, 1, aspect, 0,     // top
-            1, -aspect, 0, 1, -aspect, -1, -1, -aspect, 0,   // bottom
-            1, -aspect, -1, -1, -aspect, -1, -1, -aspect, 0, // bottom
-            -1, aspect, -1, -1, -aspect, -1, 1, aspect, -1,  // floor
-            -1, -aspect, -1, 1, -aspect, -1, 1, aspect, -1,  // floor
+            -1, -aspect, 0, -1, -aspect, zf, -1, aspect, 0,  // left
+            -1, -aspect, zf, -1, aspect, zf, -1, aspect, 0,  // left
+            1, aspect, 0, 1, aspect, zf, 1, -aspect, 0,      // right
+            1, aspect, zf, 1, -aspect, zf, 1, -aspect, 0,    // right
+            -1, aspect, 0, -1, aspect, zf, 1, aspect, 0,     // top
+            -1, aspect, zf, 1, aspect, zf, 1, aspect, 0,     // top
+            1, -aspect, 0, 1, -aspect, zf, -1, -aspect, 0,   // bottom
+            1, -aspect, zf, -1, -aspect, zf, -1, -aspect, 0, // bottom
+            -1, aspect, zf, -1, -aspect, zf, 1, aspect, zf,  // floor
+            -1, -aspect, zf, 1, -aspect, zf, 1, aspect, zf,  // floor
     };
     GLfloat COLORS[] = {
             .3, .6, .9, 1, .3, .6, .9, 1, .3, .6, .9, 1,  // left
@@ -89,7 +90,7 @@ void GLRenderer::renderParticles(const SPHSimulation *simulation) {
     GL_CHECK(glUseProgram(glProgramParticle->id));
     GL_CHECK(glUniformMatrix4fv(projM, 1, GL_FALSE, projectionMatrix.m));
     GL_CHECK(glUniformMatrix4fv(viewM, 1, GL_FALSE, viewMatrix.m));
-    GL_CHECK(glUniform1f(particleScale, 0.1));
+    GL_CHECK(glUniform1f(particleScale, 0.04));
 
     GLfloat VERTICES[] = {-1, 1, -1, -1, 1, 1, 1, -1};
 
@@ -102,7 +103,7 @@ void GLRenderer::renderParticles(const SPHSimulation *simulation) {
         GL_CHECK(glUniform4f(particlePos,
                              (GLfloat) particle->position.v[0],
                              (GLfloat) particle->position.v[1],
-                             (GLfloat) particle->position.v[2],
+                             -.01f,
                              0));
         GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
     }

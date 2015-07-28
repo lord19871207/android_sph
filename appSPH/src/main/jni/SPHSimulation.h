@@ -12,8 +12,7 @@ public:
 
     virtual ~SPHSimulation();
 
-    void initialize(double left, double right, double top, double bottom,
-                    double znear, double zfar);
+    void initialize(double left, double right, double top, double bottom);
 
     void simulate();
 
@@ -26,7 +25,7 @@ private:
 
     double applyPressure(const SPHParticle *Pi);
 
-    Vector3d applyForce(const SPHParticle *Pi);
+    Vector2d applyForce(const SPHParticle *Pi);
 
 public:
     std::vector<SPHParticle *> particles;

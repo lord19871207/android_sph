@@ -1,5 +1,5 @@
-#ifndef SPH_VECTOR_H
-#define SPH_VECTOR_H
+#ifndef SPH_VECTOR3_H
+#define SPH_VECTOR3_H
 
 #include <GLES3/gl3.h>
 #include <math.h>

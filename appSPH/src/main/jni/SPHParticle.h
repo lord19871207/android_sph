@@ -1,15 +1,15 @@
 #ifndef SPH_SPHPARTICLE_H
 #define SPH_SPHPARTICLE_H
 
-#include "Vector.h"
+#include "Vector2.h"
 
 class SPHParticle {
 
 public:
-    Vector3d position;
-    Vector3d velocity;
-    Vector3d velocityEval;
-    Vector3d force;
+    Vector2d position;
+    Vector2d velocity;
+    Vector2d velocityEval;
+    Vector2d force;
     double pressure;
     double density;
 
