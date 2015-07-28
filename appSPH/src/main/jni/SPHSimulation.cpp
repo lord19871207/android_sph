@@ -1,23 +1,23 @@
 #include "SPHSimulation.h"
 
 struct FluidVars {
-    double timeDiff = 1.0 / 60.0;
+    double timeDiff = 1.0 / 180.0;
     double restDensity = 600.0;
     double internalStiffness = 1.5;
     double viscosity = 0.35;
 
-    double boundaryStiffness = 300.0;
-    double boundaryDampening = 10.0;
+    double boundaryStiffness = 10000.0;
+    double boundaryDampening = 256.0;
 
     double accelerationLimit = 150.0;
     double velocityLimit = 600.0;
-    double simulationScale = 4.0;
+    double simulationScale = 1.0;
 
     Vector3d gravity = {0.0, -9.8, 0.0};
 
-    double particleMass = 0.00020543;
-    double smoothingRadius = 0.1;
-    double boundaryRadius = smoothingRadius;
+    double particleMass = 0.00020543 * 10;
+    double smoothingRadius = 0.05;
+    double boundaryRadius = 0.1;
 
     double d2 = simulationScale * simulationScale;
     double rd2 = smoothingRadius * smoothingRadius / d2;
