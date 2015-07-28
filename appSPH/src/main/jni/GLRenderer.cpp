@@ -103,7 +103,7 @@ void GLRenderer::renderParticles(const SPHSimulation *simulation) {
         GL_CHECK(glUniform4f(particlePos,
                              (GLfloat) particle->position.v[0],
                              (GLfloat) particle->position.v[1],
-                             -.01f,
+                             -.05f,
                              0));
         GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
     }

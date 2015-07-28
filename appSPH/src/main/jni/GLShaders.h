@@ -47,10 +47,12 @@ const GLchar *PARTICLE_FS = "#version 300 es\n"
                 in vec2 outPosition;
                 out vec4 fragColor;
                 void main() {
-                        if (length(outPosition) > 1.0) {
+                        float len = length(outPosition);
+                        if (len > 1.0) {
                                 discard;
                         } else {
-                                fragColor = vec4(0.4, 0.7, 1.0, 1.0);
+                                fragColor.rgb = vec3(0.5, 0.7, 1.0) * (1.2 - len * 0.5);
+                                fragColor.a = 1.0;
                         }
                 }
         );
