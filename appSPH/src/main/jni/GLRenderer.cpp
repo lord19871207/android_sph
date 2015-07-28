@@ -22,7 +22,7 @@ void GLRenderer::surfaceChanged(GLint width, GLint height) {
     this->height = height;
     GLfloat aspect = (GLfloat) height / width;
     projectionMatrix.setFrustum(-1, 1, -aspect, aspect, 1, 10);
-    viewMatrix.setLookAt(Vector3f(0, 0, 1), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+    viewMatrix.setLookAt(Vector3f(0, 0, 1.5), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
 }
 
 void GLRenderer::renderFrame(const SPHSimulation *simulation) {
@@ -89,7 +89,7 @@ void GLRenderer::renderParticles(const SPHSimulation *simulation) {
     GL_CHECK(glUseProgram(glProgramParticle->id));
     GL_CHECK(glUniformMatrix4fv(projM, 1, GL_FALSE, projectionMatrix.m));
     GL_CHECK(glUniformMatrix4fv(viewM, 1, GL_FALSE, viewMatrix.m));
-    GL_CHECK(glUniform1f(particleScale, 0.05));
+    GL_CHECK(glUniform1f(particleScale, 0.1));
 
     GLfloat VERTICES[] = {-1, 1, -1, -1, 1, 1, 1, -1};
 

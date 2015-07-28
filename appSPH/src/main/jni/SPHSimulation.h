@@ -24,6 +24,10 @@ private:
 
     void calcAdvance();
 
+    double applyPressure(const SPHParticle *Pi);
+
+    Vector3d applyForce(const SPHParticle *Pi);
+
 public:
     std::vector<SPHParticle *> particles;
     SPHPlane **planes;

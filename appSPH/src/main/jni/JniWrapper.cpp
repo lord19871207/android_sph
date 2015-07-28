@@ -16,7 +16,7 @@ JNIEXPORT void JNICALL Java_io_harism_app_sph_JniWrapper_onSurfaceChanged(
         JNIEnv *env, jobject obj, jint width, jint height) {
     if (sphSimulation) {
         double aspect = (double) height / width;
-        sphSimulation->initialize(-1, 1, aspect, -aspect, 0, -1);
+        sphSimulation->initialize(-1, 1, aspect, -aspect, 0, -.1);
     }
     if (glRenderer) {
         glRenderer->surfaceChanged(width, height);
